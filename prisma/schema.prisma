@@ -2,10 +2,12 @@ generator client {
   provider = "prisma-client-js"
 }
 
+
 datasource db {
   provider = "mongodb"
   url      = env("DATABASE_URL")
 }
+
 
 model User {
   id       String @id @default(auto()) @map("_id") @db.ObjectId
@@ -13,6 +15,18 @@ model User {
   email    String @unique
   password String
   role     Role @default(USER)
+}
+
+model Ticket {
+  id            String   @id @default(auto()) @map("_id") @db.ObjectId
+  flightNumber  String
+  airline       String
+  destination   String
+  departureTime DateTime
+  arrivalTime   DateTime
+  price         Float
+  availability  Int      @default(0)
+  createdAt     DateTime @default(now())
 }
 
 enum Role {

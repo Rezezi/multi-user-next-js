@@ -1,38 +1,67 @@
 "use client";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 
 export default function DashboardPage() {
+  interface Ticket {
+    id: number;
+    flightNumber: string;
+    airline: string;
+    destination: string;
+    departureTime: string;
+    arrivalTime: string;
+    price: number;
+    availability: string;
+  }
+
+  const [tickets, setTickets] = useState<Ticket[]>([]);
   const router = useRouter();
 
+  useEffect(() => {
+    const fetchTickets = async () => {
+      const res = await fetch("/api/tickets");
+      const data = await res.json();
+      setTickets(data);
+    };
+    fetchTickets();
+  }, []);
+
   const handleLogout = () => {
-    document.cookie = "token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC;"; // Hapus token
-    router.push("/login"); // Redirect ke halaman login
+    document.cookie = "token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC;";
+    router.push("/login");
+  };
+
+  const handlePesan = (id: number) => {
+    alert(`Tiket dengan ID ${id} berhasil dipesan!`);
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-r from-green-400 to-teal-500 flex items-center justify-center">
-      <div className="bg-white p-10 rounded-lg shadow-xl w-full sm:w-96 text-center">
-        <h1 className="text-4xl font-semibold text-gray-800 mb-6">Welcome to Your Dashboard</h1>
-        <p className="text-lg text-gray-700 mb-4">Hello, User! Here is your personalized dashboard.</p>
-
+    <div className="min-h-screen bg-gray-100 flex items-center justify-center p-4">
+      <div className="bg-white p-8 rounded-lg shadow-md w-full max-w-3xl">
+        <h1 className="text-3xl font-bold text-center text-gray-800 mb-6">Dashboard Tiket</h1>
         <div className="space-y-4">
-          <div className="p-6 bg-blue-50 rounded-lg shadow-lg hover:shadow-xl transition transform hover:-translate-y-1">
-            <h2 className="text-xl font-semibold text-blue-600">Recent Activity</h2>
-            <p className="text-gray-600">Check your recent activities and updates here.</p>
-          </div>
-          <div className="p-6 bg-yellow-50 rounded-lg shadow-lg hover:shadow-xl transition transform hover:-translate-y-1">
-            <h2 className="text-xl font-semibold text-yellow-600">Notifications</h2>
-            <p className="text-gray-600">You have 3 new notifications.</p>
-          </div>
-          <div className="p-6 bg-purple-50 rounded-lg shadow-lg hover:shadow-xl transition transform hover:-translate-y-1">
-            <h2 className="text-xl font-semibold text-purple-600">Settings</h2>
-            <p className="text-gray-600">Update your profile settings and preferences.</p>
-          </div>
+          {tickets.map((ticket) => (
+            <div key={ticket.id} className="p-4 border border-gray-300 rounded-lg bg-gray-50">
+              <h2 className="text-xl font-semibold text-blue-600">
+                {ticket.flightNumber} - {ticket.airline}
+              </h2>
+              <p className="text-sm text-gray-700">Tujuan: {ticket.destination}</p>
+              <p className="text-sm text-gray-700">Keberangkatan: {ticket.departureTime}</p>
+              <p className="text-sm text-gray-700">Kedatangan: {ticket.arrivalTime}</p>
+              <p className="text-sm text-gray-700">Harga: Rp{ticket.price}</p>
+              <p className="text-sm text-gray-700">Ketersediaan: {ticket.availability}</p>
+              <button
+                onClick={() => handlePesan(ticket.id)}
+                className="mt-3 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition w-full"
+              >
+                Pesan
+              </button>
+            </div>
+          ))}
         </div>
-
         <button
           onClick={handleLogout}
-          className="mt-6 px-6 py-3 bg-red-600 text-white rounded-lg shadow-md hover:bg-red-700 transition"
+          className="mt-6 w-full py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition"
         >
           Logout
         </button>
